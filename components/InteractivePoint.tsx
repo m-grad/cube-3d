@@ -12,6 +12,7 @@ export interface InteractivePointProps {
   size?: number;
   showTooltipOnHover?: boolean;
   showTooltipOnClick?: boolean;
+  shouldUnpin?: boolean;
   onPointClick?: (label: string, position: [number, number, number]) => void;
   onPointHover?: (label: string, isHovered: boolean) => void;
   onTooltipUpdate?: (data: {
@@ -34,13 +35,22 @@ export default function InteractivePoint({
   size = 0.1,
   showTooltipOnHover = true,
   showTooltipOnClick = true,
+  shouldUnpin = false,
   onPointClick,
   onPointHover,
   onTooltipUpdate,
 }: InteractivePointProps) {
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
+  const [pinned, setPinned] = useState(false);
   const { camera, size: canvasSize } = useThree();
+
+  // Handle external unpin request
+  useEffect(() => {
+    if (shouldUnpin && pinned) {
+      setPinned(false);
+    }
+  }, [shouldUnpin, pinned]);
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -52,7 +62,7 @@ export default function InteractivePoint({
       const x = (vector.x * 0.5 + 0.5) * canvasSize.width;
       const y = (-vector.y * 0.5 + 0.5) * canvasSize.height;
       
-      const shouldShow = isVisible && showTooltipOnHover && hovered;
+      const shouldShow = isVisible && (pinned || (showTooltipOnHover && hovered));
       
       if (onTooltipUpdate) {
         onTooltipUpdate({
@@ -63,7 +73,7 @@ export default function InteractivePoint({
           description,
           color,
           position,
-          clicked: false,
+          clicked: pinned,
         });
       }
     }
@@ -85,6 +95,7 @@ export default function InteractivePoint({
 
   const handleClick = (e: any) => {
     e.stopPropagation();
+    setPinned(true);
     onPointClick?.(label, position);
   };
 

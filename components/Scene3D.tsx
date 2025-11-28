@@ -72,15 +72,31 @@ const points = [
 
 export default function Scene3D() {
   const [tooltips, setTooltips] = useState<Map<string, TooltipData>>(new Map());
+  const [closedTooltips, setClosedTooltips] = useState<Set<string>>(new Set());
 
   const handlePointClick = (label: string, position: [number, number, number]) => {
     console.log(`Kliknięto punkt: ${label}`, position);
+    setClosedTooltips((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(label);
+      return newSet;
+    });
   };
 
   const handlePointHover = (label: string, isHovered: boolean) => {
     if (isHovered) {
       console.log(`Hover nad punktem: ${label}`);
     }
+  };
+
+  const handleTooltipClose = (label: string) => {
+    console.log(`Zamknięto tooltip: ${label}`);
+    setClosedTooltips((prev) => new Set(prev).add(label));
+    setTooltips((prev) => {
+      const newTooltips = new Map(prev);
+      newTooltips.delete(label);
+      return newTooltips;
+    });
   };
 
   const handleTooltipUpdate = useCallback((data: {
@@ -118,6 +134,7 @@ export default function Scene3D() {
         description: data.description,
         color: data.color,
         children,
+        pinned: data.clicked,
       });
       
       return newTooltips;
@@ -128,7 +145,7 @@ export default function Scene3D() {
     <div className="w-full h-full relative">
       <Canvas
         camera={{
-          position: [2, 4, 6],
+          position: [10, 12, 12],
           fov: 60,
           near: 0.1,
           far: 1000,
@@ -176,6 +193,7 @@ export default function Scene3D() {
             size={0.1}
             showTooltipOnHover={true}
             showTooltipOnClick={false}
+            shouldUnpin={closedTooltips.has(point.label)}
             onPointClick={handlePointClick}
             onPointHover={handlePointHover}
             onTooltipUpdate={handleTooltipUpdate}
@@ -193,7 +211,7 @@ export default function Scene3D() {
         />
       </Canvas>
 
-      <TooltipOverlay tooltips={tooltips} />
+      <TooltipOverlay tooltips={tooltips} onClose={handleTooltipClose} />
     </div>
   );
 }

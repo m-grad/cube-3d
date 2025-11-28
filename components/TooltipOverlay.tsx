@@ -10,13 +10,15 @@ export interface TooltipData {
   description?: string;
   color?: string;
   children?: ReactNode;
+  pinned?: boolean;
 }
 
 interface TooltipOverlayProps {
   tooltips: Map<string, TooltipData>;
+  onClose?: (label: string) => void;
 }
 
-export default function TooltipOverlay({ tooltips }: TooltipOverlayProps) {
+export default function TooltipOverlay({ tooltips, onClose }: TooltipOverlayProps) {
   return (
     <div className="fixed inset-0 pointer-events-none z-50">
       {Array.from(tooltips.values()).map((tooltip) => {
@@ -34,7 +36,7 @@ export default function TooltipOverlay({ tooltips }: TooltipOverlayProps) {
         return (
           <div
             key={tooltip.label}
-            className="absolute transition-all duration-200 ease-out"
+            className={`absolute ${tooltip.pinned ? '' : 'transition-all duration-200 ease-out'}`}
             style={{
               left: `${adjustedX}px`,
               top: `${adjustedY}px`,
@@ -42,7 +44,7 @@ export default function TooltipOverlay({ tooltips }: TooltipOverlayProps) {
             }}
           >
             <div
-              className="bg-gray-900/95 backdrop-blur-sm text-white px-4 py-3 rounded-lg shadow-2xl border-2 min-w-[180px]"
+              className="bg-gray-900/95 backdrop-blur-sm text-white px-4 py-3 rounded-lg shadow-2xl border-2 min-w-[180px] pointer-events-auto"
               style={{
                 borderColor: tooltip.color || '#10b981',
                 boxShadow: `0 0 20px ${tooltip.color || '#10b981'}40, 0 10px 40px rgba(0,0,0,0.5)`,
@@ -56,7 +58,19 @@ export default function TooltipOverlay({ tooltips }: TooltipOverlayProps) {
                     boxShadow: `0 0 10px ${tooltip.color || '#10b981'}`,
                   }}
                 />
-                <h3 className="font-bold text-sm">{tooltip.label}</h3>
+                <h3 className="font-bold text-sm flex-1">{tooltip.label}</h3>
+                {tooltip.pinned && onClose && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClose(tooltip.label);
+                    }}
+                    className="text-gray-400 hover:text-white transition-colors w-5 h-5 flex items-center justify-center rounded hover:bg-gray-700/50"
+                    aria-label="Zamknij tooltip"
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
 
               {tooltip.description && (
@@ -86,4 +100,3 @@ export default function TooltipOverlay({ tooltips }: TooltipOverlayProps) {
     </div>
   );
 }
-
