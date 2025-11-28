@@ -40,7 +40,6 @@ export default function InteractivePoint({
 }: InteractivePointProps) {
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
-  const [clicked, setClicked] = useState(false);
   const { camera, size: canvasSize } = useThree();
 
   useFrame((state) => {
@@ -53,7 +52,7 @@ export default function InteractivePoint({
       const x = (vector.x * 0.5 + 0.5) * canvasSize.width;
       const y = (-vector.y * 0.5 + 0.5) * canvasSize.height;
       
-      const shouldShow = isVisible && ((showTooltipOnHover && hovered) || (showTooltipOnClick && clicked));
+      const shouldShow = isVisible && showTooltipOnHover && hovered;
       
       if (onTooltipUpdate) {
         onTooltipUpdate({
@@ -64,7 +63,7 @@ export default function InteractivePoint({
           description,
           color,
           position,
-          clicked,
+          clicked: false,
         });
       }
     }
@@ -86,11 +85,7 @@ export default function InteractivePoint({
 
   const handleClick = (e: any) => {
     e.stopPropagation();
-    setClicked(!clicked);
     onPointClick?.(label, position);
-    
-    // Auto-reset clicked state after 2 seconds
-    setTimeout(() => setClicked(false), 2000);
   };
 
   return (
@@ -113,4 +108,3 @@ export default function InteractivePoint({
       </group>
   );
 }
-

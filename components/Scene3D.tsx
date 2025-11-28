@@ -105,7 +105,7 @@ export default function Scene3D() {
             </span>
           </div>
           <div className="text-xs text-gray-500 italic">
-            {data.clicked ? "🔒 Przypięty" : "💡 Kliknij aby przypiąć"}
+            💡 Informacje o punkcie
           </div>
         </div>
       );
@@ -135,7 +135,6 @@ export default function Scene3D() {
         }}
         className="bg-gradient-to-b from-gray-900 to-black"
       >
-        {/* Oświetlenie */}
         <ambientLight intensity={0.5} />
         <directionalLight
           position={[10, 10, 5]}
@@ -149,7 +148,6 @@ export default function Scene3D() {
           intensity={0.3}
         />
 
-        {/* Siatka pomocnicza - Grid Helper */}
         <Grid
           args={[20, 20]}
           cellSize={1}
@@ -164,13 +162,10 @@ export default function Scene3D() {
           infiniteGrid={false}
         />
 
-        {/* Environment Map dla lepszych refleksji szkła */}
         <Environment preset="city" />
 
-        {/* Model kostki 3D */}
         <CubeModel size={8} position={[0, 4, 0]} autoRotate={false} />
 
-        {/* Interaktywne punkty na ścianach kostki */}
         {points.map((point) => (
           <InteractivePoint
             key={point.label}
@@ -180,14 +175,13 @@ export default function Scene3D() {
             color={point.color}
             size={0.1}
             showTooltipOnHover={true}
-            showTooltipOnClick={true}
+            showTooltipOnClick={false}
             onPointClick={handlePointClick}
             onPointHover={handlePointHover}
             onTooltipUpdate={handleTooltipUpdate}
           />
         ))}
 
-        {/* OrbitControls - możliwość obracania kamerą */}
         <OrbitControls
           enableDamping
           dampingFactor={0.05}
@@ -199,7 +193,6 @@ export default function Scene3D() {
         />
       </Canvas>
 
-      {/* Tooltips renderowane poza Canvas w HTML overlay */}
       <TooltipOverlay tooltips={tooltips} />
     </div>
   );
